@@ -12,6 +12,7 @@ import joblib
 import time
 
 
+
 # function definition
 def adjust_min(x,level):
     if x!=0:
@@ -51,11 +52,11 @@ if 'month_selected' not in st.session_state:
 
 # data and model load
 if not isinstance(st.session_state.data_summary, pd.DataFrame):
-    st.session_state.data_summary = pd.read_pickle("../dataset/data_summary.pkl")
+    st.session_state.data_summary = pd.read_pickle("./dataset/data_summary.pkl")
     st.success('Data summary successfully loaded', icon="✅")
 
 if not isinstance(st.session_state.ref_cols, list):
-    st.session_state.model, st.session_state.ref_cols, st.session_state.target = joblib.load("../dataset/ml_model.pkl")
+    st.session_state.model, st.session_state.ref_cols, st.session_state.target = joblib.load("./dataset/ml_model.pkl")
     st.success('Predictive model successfully loaded', icon="✅")
 
 
@@ -165,6 +166,7 @@ def predict():
 btn1 = st.button('Make a prediction', type='primary')
 if btn1:
     prediction = predict()
+    
     st.write('Predicted bikes demand:', round(prediction) )
 
 # data_summary.info()
