@@ -12,7 +12,6 @@ import joblib
 import time
 
 
-
 # function definition
 def adjust_min(x,level):
     if x!=0:
