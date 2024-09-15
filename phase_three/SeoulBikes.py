@@ -34,6 +34,9 @@ def default_value(x_min, x_max, level, to_int=True):
 
 if 'data_summary' not in st.session_state:
     st.session_state.data_summary = ''
+if 'solar_average' not in st.session_state:
+    st.session_state.solar_average = ''
+    
 if 'model' not in st.session_state:
     st.session_state.model = ''
 if 'ref_cols' not in st.session_state:
@@ -45,14 +48,20 @@ if 'season_selected' not in st.session_state:
     st.session_state.season_selected = ''
 if 'month_selected' not in st.session_state:
     st.session_state.month_selected = ''
-# if 'week_selected' not in st.session_state:
-#     st.session_state.week_selected = ''
+if 'week_selected' not in st.session_state:
+    st.session_state.week_selected = ''
+if 'hour_selected' not in st.session_state:
+    st.session_state.hour_selected = ''
 
 
 # data and model load
 if not isinstance(st.session_state.data_summary, pd.DataFrame):
     st.session_state.data_summary = pd.read_pickle("./dataset/data_summary.pkl")
-    st.success('Data summary successfully loaded', icon="✅")
+    st.success('Monthly summary of data successfully loaded', icon="✅")
+
+if not isinstance(st.session_state.solar_average, pd.DataFrame):
+    st.session_state.solar_average = pd.read_pickle("./dataset/solar_average.pkl")
+    st.success('Solar radiation statistics successfully loaded', icon="✅")
 
 if not isinstance(st.session_state.ref_cols, list):
     st.session_state.model, st.session_state.ref_cols, st.session_state.target = joblib.load("./dataset/ml_model.pkl")
@@ -90,11 +99,12 @@ with col51:
     week_min = st.session_state.data_summary[st.session_state.data_summary['Month'] == st.session_state.month_selected]['Week min'].iloc[0]
     week_max = st.session_state.data_summary[st.session_state.data_summary['Month'] == st.session_state.month_selected]['Week max'].iloc[0]
 #    st.session_state.week_selected = st.slider('Select week number', min_value=week_min, max_value=week_max)
-    week_selected = st.slider('**Select week number**', min_value=week_min, max_value=week_max, value = week_min+1)
-    
+#    week_selected = st.slider('**Select week number**', min_value=week_min, max_value=week_max, value = week_min+1)
+    st.session_state.week_selected = st.slider('**Select week number**', min_value=week_min, max_value=week_max, value = week_min+1)    
+
 with col52:
     # Hour selection
-    hour_selected = st.slider('**Select the hour**', min_value=0, max_value=23, value=12)
+    st.session_state.hour_selected = st.slider('**Select the hour**', min_value=0, max_value=23, value=12)
 
 col21, col22, col23 = st.columns(3)
 
@@ -109,8 +119,10 @@ with col22:
     # Solar Radiation (MJ/m2) selection
     solar_min = st.session_state.data_summary[st.session_state.data_summary['Month'] == st.session_state.month_selected]['Solar Radiation (MJ/m2) min'].item()
     solar_max = st.session_state.data_summary[st.session_state.data_summary['Month'] == st.session_state.month_selected]['Solar Radiation (MJ/m2) max'].item()
-    solar_selected = st.slider('**Solar Radiation (MJ/m2)**', min_value=solar_min, max_value=solar_max, 
-                               value = default_value(solar_min, solar_max, 0.4, False))
+    solar_avg = st.session_state.solar_average[(st.session_state.solar_average['Month'] == st.session_state.month_selected) & 
+                                               (st.session_state.solar_average['Hour'] == st.session_state.hour_selected)]['Solar Radiation (MJ/m2)'].item()
+    solar_selected = st.slider('**Solar Radiation (MJ/m2)**', min_value=solar_min, max_value=solar_max, value = solar_avg)
+
 
 with col23:
     # Visiility selection
@@ -154,9 +166,9 @@ with col43:
 
 
 def predict():
-    row = np.array([hour_selected, temperature_selected, humidity_selected, wind_selected, 
+    row = np.array([st.session_state.hour_selected, temperature_selected, humidity_selected, wind_selected, 
                     visibility_selected, solar_selected, rainfall_selected, snowfall_selected,
-                    st.session_state.season_selected, holiday_selected, daytype_selected, week_selected])
+                    st.session_state.season_selected, holiday_selected, daytype_selected, st.session_state.week_selected])
     X_new = pd.DataFrame([row], columns=st.session_state.ref_cols)
     prediction = st.session_state.model.predict(X_new)[0]
     return prediction

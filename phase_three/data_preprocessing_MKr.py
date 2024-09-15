@@ -24,9 +24,10 @@ categorical_fetures = [
 ]
 data[categorical_fetures] = data[categorical_fetures].astype("category")
 
-data.info()
-data['Seasons'].unique()
+# data.info()
+# data['DayType'].unique()
 
+# DATA SUMMARY PREPARATION
 # data aggregation on Month
 monthly_stats = data.groupby('Month').agg({
     'Temperature(°C)': ['min', 'max'],
@@ -38,12 +39,6 @@ monthly_stats = data.groupby('Month').agg({
     'Snowfall (cm)': ['min', 'max']    
 }).reset_index()
 
-data = data.drop(columns=['Month'])
-
-
-data.to_pickle("../dataset/processed_data.pkl")
-
-
 months = ['January', 'February', 'March', 'April', 'May', 'June', 
           'July', 'August', 'September', 'October', 'November', 'December']
 
@@ -51,7 +46,6 @@ seasons = ['Winter', 'Winter', 'Spring', 'Spring', 'Spring', 'Summer',
            'Summer', 'Summer', 'Autumn', 'Autumn', 'Autumn', 'Winter']
 
 week_min = [1, 6, 10, 14, 19, 23, 27, 32, 36, 40, 45, 49]
-
 week_max = [5, 9, 13, 18, 22, 26, 31, 35, 39, 44, 48, 52]
 
 # New dataframe with summary 
@@ -77,5 +71,12 @@ data_summary = pd.merge(data_summary, monthly_stats, on='Month', how='left')
 
 data_summary.to_pickle("../dataset/data_summary.pkl")
 
+# SOLAR RADIATION AVERAGE PREPARATION
+solar_average = data.groupby(['Month', 'Hour'])['Solar Radiation (MJ/m2)'].mean().reset_index()
+solar_average.to_pickle("../dataset/solar_average.pkl")
 
-data["Temperature(°C)"].describe()
+
+# processed detailed data export to pkl file
+data = data.drop(columns=['Month'])
+data.to_pickle("../dataset/processed_data.pkl")
+
