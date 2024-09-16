@@ -57,20 +57,41 @@ if 'hour_selected' not in st.session_state:
 # data and model load
 if not isinstance(st.session_state.data_summary, pd.DataFrame):
     st.session_state.data_summary = pd.read_pickle("./dataset/data_summary.pkl")
-    st.success('Monthly summary of data successfully loaded', icon="✅")
+    # st.info('Monthly summary of data successfully loaded', icon="ℹ️")
+    # time.sleep(0.5)
 
 if not isinstance(st.session_state.solar_average, pd.DataFrame):
     st.session_state.solar_average = pd.read_pickle("./dataset/solar_average.pkl")
-    st.success('Solar radiation statistics successfully loaded', icon="✅")
+    # st.info('Solar radiation statistics successfully loaded', icon="ℹ️")
+    # time.sleep(0.5)
 
 if not isinstance(st.session_state.ref_cols, list):
     st.session_state.model, st.session_state.ref_cols, st.session_state.target = joblib.load("./dataset/ml_model.pkl")
-    st.success('Predictive model successfully loaded', icon="✅")
+    # st.info('Predictive model successfully loaded', icon="ℹ️")
+#     time.sleep(0.5)
+# #    st.experimental_rerun()
+#     st.rerun()
 
 
 st.markdown('# Seoul Bikes demand prediction')
 
+with st.expander('###### Expand to show description'):
+    st.markdown('''Currently Rental bikes are introduced in many urban cities for the enhancement of mobility comfort. 
+                It is important to make the rental bike available and accessible to the public at the right time as 
+                it lessens the waiting time. Eventually, providing the city with a stable supply of rental bikes becomes 
+                a major concern. The crucial part is the prediction of bike count required at each hour for the 
+                stable supply of rental bikes.''')
 
+    url = 'https://archive.ics.uci.edu/dataset/560/seoul+bike+sharing+demand'
+                
+    st.markdown('''The dataset [Seoul Bike Sharing Demand](%s) for machine learning algorythm contains weather information 
+                (Temperature, Humidity, Windspeed, Visibility, Dewpoint, Solar radiation, Snowfall, Rainfall), 
+                the number of bikes rented per hour and date information.''' % url)
+                
+    st.markdown('''**To use the application**, select the relevant parameter values and click the **Predict Demand button**. 
+                Please note that the available minimum, maximum and default values are dynamically selected based 
+                on historical data from 2018 but should be adjuted to meet the required conditions   ''' )
+    
 with st.container(border=True):
     st.markdown('###### Select the time for which to make a prediction')
 
@@ -179,13 +200,14 @@ def predict():
     prediction = st.session_state.model.predict(X_new)[0]
     return prediction
  
+col61, col62 = st.columns(2)
 
-btn1 = st.button('Make a prediction', type='primary')
-if btn1:
-    prediction = predict()
-    
-#    st.write('Predicted bikes demand:', round(prediction) )
-    st.success(f"**Predicted demand**: {round(prediction)} bikes")
+with col61:
+    btn1 = st.button('Predict Demand', type='primary')
+    if btn1:
+        prediction = predict()
+        with col62:
+            st.success(f"**Predicted demand**: {round(prediction)} bikes")
 
-# data_summary.info()
-# st.info(st.session_state.ref_cols, icon="ℹ️")
+
+
